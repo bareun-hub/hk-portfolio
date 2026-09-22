@@ -72,6 +72,54 @@
   font-size: 13px;
 }
 
+.making-links {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: end;
+  gap: 40px;
+  padding: 58px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.making-links h2 {
+  margin: 10px 0 6px;
+  font-size: 30px;
+  font-weight: 500;
+}
+
+.making-links p:last-child {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.youtube-button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 72px;
+  padding: 18px 22px;
+  background: #e62117;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 500;
+  transition: background-color .2s ease, transform .2s ease;
+}
+
+.youtube-button:hover {
+  background: #bd1710;
+  transform: translateY(-2px);
+}
+
+.youtube-button:focus-visible {
+  outline-color: #e62117;
+  outline-offset: 4px;
+}
+
+.youtube-button span {
+  font-size: 24px;
+}
+
 .about-quote {
   display: grid;
   grid-template-columns: 1fr 2fr;
@@ -144,6 +192,16 @@
 
   .about-grid ul {
     margin-top: 20px;
+  }
+
+  .making-links {
+    grid-template-columns: 1fr;
+    gap: 24px;
+    padding: 40px 0;
+  }
+
+  .making-links h2 {
+    font-size: 26px;
   }
 
   .about-quote {
