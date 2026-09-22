@@ -13,7 +13,7 @@
           <stop offset="1" stop-color="#bf5af2"/>
         </linearGradient>
       </defs>
-      <g transform="rotate(-42 36 36)" stroke="#20211f" stroke-width="2" stroke-linejoin="round">
+      <g transform="rotate(138 36 36)" stroke="#20211f" stroke-width="2" stroke-linejoin="round">
         <path d="M29 9h14a4 4 0 0 1 4 4v39H25V13a4 4 0 0 1 4-4Z" fill="#ffd447"/>
         <path d="M25 18h22v7H25z" fill="url(#rainbow-stripe)" stroke="none"/>
         <path d="M25 45h22v7H25z" fill="#f4f0df"/>
@@ -25,7 +25,7 @@
     </svg>
   `;
 
-  const cursor = `url("data:image/svg+xml,${encodeURIComponent(pencilSvg)}") 26 27, auto`;
+  const cursor = `url("data:image/svg+xml,${encodeURIComponent(pencilSvg)}") 6 5, auto`;
   const style = document.createElement('style');
   style.textContent = `
     html,body,body *{cursor:${cursor}!important}
