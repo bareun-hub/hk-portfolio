@@ -4,7 +4,7 @@
   button.type = 'button';
   button.className = 'sound-toggle';
   button.setAttribute('aria-pressed', 'false');
-  button.setAttribute('aria-label', '기분 좋은 배경 음악 켜기');
+  button.setAttribute('aria-label', '발랄한 배경 음악 켜기');
   button.innerHTML = '<span class="sound-dot" aria-hidden="true"></span><span class="sound-label">음악 켜기</span>';
   document.body.append(button);
 
@@ -15,8 +15,8 @@
     .sound-toggle:focus-visible{outline:2px solid #526d59;outline-offset:4px}
     .sound-toggle[aria-pressed="true"]{background:#20211f;color:#fff}
     .sound-dot{width:8px;height:8px;border:1px solid currentColor;border-radius:50%}
-    .sound-toggle[aria-pressed="true"] .sound-dot{background:currentColor;animation:sound-pulse 1.6s ease-in-out infinite}
-    @keyframes sound-pulse{0%,100%{opacity:.45;transform:scale(.8)}50%{opacity:1;transform:scale(1.18)}}
+    .sound-toggle[aria-pressed="true"] .sound-dot{background:currentColor;animation:sound-pulse 1.05s ease-in-out infinite}
+    @keyframes sound-pulse{0%,100%{opacity:.45;transform:scale(.8)}50%{opacity:1;transform:scale(1.2)}}
     @media(max-width:600px){.sound-toggle{right:14px;bottom:14px}}
     @media(prefers-reduced-motion:reduce){.sound-toggle,.sound-dot{transition:none!important;animation:none!important}}
   `;
@@ -28,13 +28,13 @@
     return;
   }
 
-  const progressions = [
-    [261.63, 329.63, 392.00, 493.88],
-    [220.00, 261.63, 329.63, 392.00],
-    [174.61, 220.00, 261.63, 329.63],
-    [196.00, 246.94, 293.66, 329.63]
+  const chords = [
+    [261.63, 329.63, 392.00],
+    [196.00, 246.94, 392.00],
+    [220.00, 261.63, 329.63],
+    [174.61, 220.00, 349.23]
   ];
-  const melodySteps = [0, 1, 2, 1, 3, 2, 1, 2];
+  const melody = [0, 1, 2, 1, 0, 2, 1, 2];
 
   let context;
   let master;
@@ -49,59 +49,71 @@
     return source;
   }
 
-  function addPad(frequency, start, duration, position) {
+  function addPluck(frequency, start, accent = false) {
     const oscillator = register(context.createOscillator());
     const gain = context.createGain();
     const filter = context.createBiquadFilter();
 
-    oscillator.type = position % 2 ? 'triangle' : 'sine';
-    oscillator.frequency.value = frequency / 2;
-    oscillator.detune.value = (position - 1.5) * 2;
+    oscillator.type = 'triangle';
+    oscillator.frequency.setValueAtTime(frequency * 2, start);
+    oscillator.frequency.exponentialRampToValueAtTime(frequency * 1.995, start + 0.28);
     filter.type = 'lowpass';
-    filter.frequency.value = 1500;
-    filter.Q.value = 0.25;
+    filter.frequency.value = 3100;
+    filter.Q.value = 0.7;
 
     gain.gain.setValueAtTime(0.0001, start);
-    gain.gain.exponentialRampToValueAtTime(0.018, start + 0.8);
-    gain.gain.setValueAtTime(0.018, start + duration - 0.8);
-    gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+    gain.gain.exponentialRampToValueAtTime(accent ? 0.075 : 0.052, start + 0.012);
+    gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.38);
 
     oscillator.connect(filter).connect(gain).connect(master);
     oscillator.start(start);
-    oscillator.stop(start + duration + 0.05);
+    oscillator.stop(start + 0.42);
   }
 
-  function addBell(frequency, start, accent = false) {
+  function addBass(frequency, start) {
     const oscillator = register(context.createOscillator());
     const gain = context.createGain();
-    const filter = context.createBiquadFilter();
 
     oscillator.type = 'sine';
-    oscillator.frequency.value = frequency * 2;
-    filter.type = 'lowpass';
-    filter.frequency.value = 2600;
-
-    const volume = accent ? 0.06 : 0.042;
+    oscillator.frequency.value = frequency / 2;
     gain.gain.setValueAtTime(0.0001, start);
-    gain.gain.exponentialRampToValueAtTime(volume, start + 0.025);
-    gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.75);
+    gain.gain.exponentialRampToValueAtTime(0.055, start + 0.018);
+    gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.48);
 
-    oscillator.connect(filter).connect(gain).connect(master);
+    oscillator.connect(gain).connect(master);
     oscillator.start(start);
-    oscillator.stop(start + 0.8);
+    oscillator.stop(start + 0.52);
+  }
+
+  function addSparkle(frequency, start) {
+    const oscillator = register(context.createOscillator());
+    const gain = context.createGain();
+
+    oscillator.type = 'sine';
+    oscillator.frequency.value = frequency * 4;
+    gain.gain.setValueAtTime(0.0001, start);
+    gain.gain.exponentialRampToValueAtTime(0.018, start + 0.008);
+    gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.22);
+
+    oscillator.connect(gain).connect(master);
+    oscillator.start(start);
+    oscillator.stop(start + 0.25);
   }
 
   function schedulePhrase() {
     if (!context || context.state === 'closed') return;
-    const start = context.currentTime + 0.06;
-    const chord = progressions[chordIndex];
+    const start = context.currentTime + 0.05;
+    const chord = chords[chordIndex];
 
-    chord.forEach((frequency, position) => addPad(frequency, start, 4.8, position));
-    melodySteps.forEach((step, index) => {
-      addBell(chord[step], start + index * 0.52, index === 0 || index === 4);
+    addBass(chord[0], start);
+    addBass(chord[0], start + 1.08);
+    melody.forEach((step, index) => {
+      const noteStart = start + index * 0.27;
+      addPluck(chord[step], noteStart, index === 0 || index === 4);
+      if (index === 3 || index === 7) addSparkle(chord[step], noteStart);
     });
 
-    chordIndex = (chordIndex + 1) % progressions.length;
+    chordIndex = (chordIndex + 1) % chords.length;
   }
 
   async function startMusic() {
@@ -113,7 +125,7 @@
     context = nextContext;
     master = nextMaster;
     master.gain.setValueAtTime(0.0001, context.currentTime);
-    master.gain.exponentialRampToValueAtTime(0.9, context.currentTime + 0.8);
+    master.gain.exponentialRampToValueAtTime(0.82, context.currentTime + 0.35);
     master.connect(context.destination);
 
     try {
@@ -123,9 +135,9 @@
         return;
       }
       schedulePhrase();
-      timer = window.setInterval(schedulePhrase, 4200);
+      timer = window.setInterval(schedulePhrase, 2160);
       button.setAttribute('aria-pressed', 'true');
-      button.setAttribute('aria-label', '기분 좋은 배경 음악 끄기');
+      button.setAttribute('aria-label', '발랄한 배경 음악 끄기');
       button.querySelector('.sound-label').textContent = '음악 끄기';
     } finally {
       isStarting = false;
@@ -157,16 +169,13 @@
     }
 
     button.setAttribute('aria-pressed', 'false');
-    button.setAttribute('aria-label', '기분 좋은 배경 음악 켜기');
+    button.setAttribute('aria-label', '발랄한 배경 음악 켜기');
     button.querySelector('.sound-label').textContent = '음악 켜기';
   }
 
   button.addEventListener('click', async () => {
-    if (button.getAttribute('aria-pressed') === 'true' || context) {
-      stopMusic();
-    } else {
-      await startMusic();
-    }
+    if (button.getAttribute('aria-pressed') === 'true' || context) stopMusic();
+    else await startMusic();
   });
 
   window.addEventListener('pagehide', stopMusic, { once: true });
