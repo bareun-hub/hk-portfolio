@@ -74,7 +74,7 @@
 
 .making-links {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(240px, .65fr) minmax(0, 1.35fr);
   align-items: end;
   gap: 40px;
   padding: 58px 0;
@@ -93,31 +93,73 @@
   font-size: 14px;
 }
 
-.youtube-button {
-  display: flex;
+.portfolio-links {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.portfolio-link {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  justify-content: space-between;
-  min-height: 72px;
-  padding: 18px 22px;
-  background: #e62117;
+  gap: 18px;
+  min-height: 104px;
+  border: 1px solid var(--ink);
+  padding: 20px 22px;
+  transition: background-color .2s ease, color .2s ease;
+}
+
+.portfolio-link-youtube {
+  background: #b9c8ad;
+  color: var(--ink);
+}
+
+.portfolio-link-website {
+  background: #d8c58f;
+  color: var(--ink);
+}
+
+.portfolio-link-youtube:hover,
+.portfolio-link-youtube:focus-visible,
+.portfolio-link-website:hover,
+.portfolio-link-website:focus-visible {
+  background: #22241f;
   color: #fff;
-  font-size: 15px;
+}
+
+.portfolio-link-copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.portfolio-link small {
+  color: #4f554c;
+  font-size: 9px;
   font-weight: 500;
-  transition: background-color .2s ease, transform .2s ease;
+  letter-spacing: 1.25px;
+  line-height: 1.3;
 }
 
-.youtube-button:hover {
-  background: #bd1710;
-  transform: translateY(-2px);
+.portfolio-link-youtube:hover small,
+.portfolio-link-youtube:focus-visible small,
+.portfolio-link-website:hover small,
+.portfolio-link-website:focus-visible small {
+  color: #b8bbb4;
 }
 
-.youtube-button:focus-visible {
-  outline-color: #e62117;
-  outline-offset: 4px;
+.portfolio-link strong {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.5;
+  word-break: keep-all;
 }
 
-.youtube-button span {
+.portfolio-link-arrow {
   font-size: 24px;
+  line-height: 1;
 }
 
 .about-quote {
@@ -153,7 +195,7 @@
   font-size: 13px;
 }
 
-@media (max-width: 700px) {
+@media (max-width: 900px) {
   .about-lead {
     grid-template-columns: 1fr;
     padding: 32px 0 45px;
@@ -171,6 +213,36 @@
     font-size: 14px;
   }
 
+  .making-links {
+    grid-template-columns: 1fr;
+    gap: 24px;
+    padding: 40px 0;
+  }
+
+  .making-links h2 {
+    font-size: 26px;
+  }
+
+  .portfolio-link {
+    min-height: 94px;
+  }
+
+  .about-quote {
+    grid-template-columns: 1fr;
+    margin: 45px 0;
+    padding: 28px;
+  }
+
+  .about-quote blockquote {
+    font-size: 27px;
+  }
+
+  .about-quote a {
+    grid-column: 1;
+  }
+}
+
+@media (max-width: 600px) {
   .about-grid {
     grid-template-columns: 1fr;
   }
@@ -193,28 +265,7 @@
   .about-grid ul {
     margin-top: 20px;
   }
-
-  .making-links {
+  .portfolio-links {
     grid-template-columns: 1fr;
-    gap: 24px;
-    padding: 40px 0;
-  }
-
-  .making-links h2 {
-    font-size: 26px;
-  }
-
-  .about-quote {
-    grid-template-columns: 1fr;
-    margin: 45px 0;
-    padding: 28px;
-  }
-
-  .about-quote blockquote {
-    font-size: 27px;
-  }
-
-  .about-quote a {
-    grid-column: 1;
   }
 }

@@ -4,7 +4,7 @@
   button.type = 'button';
   button.className = 'sound-toggle';
   button.setAttribute('aria-pressed', 'false');
-  button.setAttribute('aria-label', '발랄한 배경 음악 켜기');
+  button.setAttribute('aria-label', '잔잔한 클래식 피아노 배경 음악 켜기');
   button.innerHTML = '<span class="sound-dot" aria-hidden="true"></span><span class="sound-label">음악 켜기</span>';
   document.body.append(button);
 
@@ -28,13 +28,48 @@
     return;
   }
 
-  const chords = [
-    [261.63, 329.63, 392.00],
-    [196.00, 246.94, 392.00],
-    [220.00, 261.63, 329.63],
-    [174.61, 220.00, 349.23]
+  const classicalMeasures = [
+    {
+      bass: 130.81,
+      chord: [261.63, 329.63, 392.00],
+      melody: [659.25, null, 587.33, 523.25, null, 493.88]
+    },
+    {
+      bass: 123.47,
+      chord: [293.66, 392.00, 493.88],
+      melody: [587.33, null, 659.25, 783.99, null, 659.25]
+    },
+    {
+      bass: 110.00,
+      chord: [261.63, 329.63, 440.00],
+      melody: [659.25, null, 783.99, 880.00, null, 783.99]
+    },
+    {
+      bass: 98.00,
+      chord: [246.94, 329.63, 392.00],
+      melody: [783.99, null, 659.25, 587.33, null, 523.25]
+    },
+    {
+      bass: 87.31,
+      chord: [261.63, 349.23, 440.00],
+      melody: [698.46, null, 659.25, 587.33, null, 523.25]
+    },
+    {
+      bass: 82.41,
+      chord: [261.63, 329.63, 392.00],
+      melody: [659.25, null, 587.33, 523.25, null, 493.88]
+    },
+    {
+      bass: 73.42,
+      chord: [261.63, 293.66, 349.23, 440.00],
+      melody: [587.33, null, 523.25, 493.88, null, 440.00]
+    },
+    {
+      bass: 98.00,
+      chord: [246.94, 293.66, 349.23, 392.00],
+      melody: [493.88, null, 587.33, 659.25, 523.25, 493.88]
+    }
   ];
-  const melody = [0, 1, 2, 1, 0, 2, 1, 2];
 
   let context;
   let master;
@@ -49,71 +84,57 @@
     return source;
   }
 
-  function addPluck(frequency, start, accent = false) {
-    const oscillator = register(context.createOscillator());
-    const gain = context.createGain();
+  function addPianoNote(frequency, start, volume = 0.05, duration = 1.1) {
     const filter = context.createBiquadFilter();
+    const noteGain = context.createGain();
+    const harmonics = [
+      { multiplier: 1, type: 'sine', level: 1 },
+      { multiplier: 2, type: 'triangle', level: 0.13 },
+      { multiplier: 3, type: 'sine', level: 0.04 }
+    ];
 
-    oscillator.type = 'triangle';
-    oscillator.frequency.setValueAtTime(frequency * 2, start);
-    oscillator.frequency.exponentialRampToValueAtTime(frequency * 1.995, start + 0.28);
     filter.type = 'lowpass';
-    filter.frequency.value = 3100;
-    filter.Q.value = 0.7;
+    filter.frequency.setValueAtTime(4200, start);
+    filter.frequency.exponentialRampToValueAtTime(1500, start + duration);
+    filter.Q.value = 0.55;
 
-    gain.gain.setValueAtTime(0.0001, start);
-    gain.gain.exponentialRampToValueAtTime(accent ? 0.075 : 0.052, start + 0.012);
-    gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.38);
+    noteGain.gain.setValueAtTime(0.0001, start);
+    noteGain.gain.exponentialRampToValueAtTime(volume, start + 0.008);
+    noteGain.gain.exponentialRampToValueAtTime(volume * 0.34, start + 0.16);
+    noteGain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+    filter.connect(noteGain).connect(master);
 
-    oscillator.connect(filter).connect(gain).connect(master);
-    oscillator.start(start);
-    oscillator.stop(start + 0.42);
-  }
-
-  function addBass(frequency, start) {
-    const oscillator = register(context.createOscillator());
-    const gain = context.createGain();
-
-    oscillator.type = 'sine';
-    oscillator.frequency.value = frequency / 2;
-    gain.gain.setValueAtTime(0.0001, start);
-    gain.gain.exponentialRampToValueAtTime(0.055, start + 0.018);
-    gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.48);
-
-    oscillator.connect(gain).connect(master);
-    oscillator.start(start);
-    oscillator.stop(start + 0.52);
-  }
-
-  function addSparkle(frequency, start) {
-    const oscillator = register(context.createOscillator());
-    const gain = context.createGain();
-
-    oscillator.type = 'sine';
-    oscillator.frequency.value = frequency * 4;
-    gain.gain.setValueAtTime(0.0001, start);
-    gain.gain.exponentialRampToValueAtTime(0.018, start + 0.008);
-    gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.22);
-
-    oscillator.connect(gain).connect(master);
-    oscillator.start(start);
-    oscillator.stop(start + 0.25);
+    harmonics.forEach(({ multiplier, type, level }) => {
+      const oscillator = register(context.createOscillator());
+      const harmonicGain = context.createGain();
+      oscillator.type = type;
+      oscillator.frequency.setValueAtTime(frequency * multiplier, start);
+      oscillator.detune.value = multiplier === 1 ? -2 : 2;
+      harmonicGain.gain.value = level;
+      oscillator.connect(harmonicGain).connect(filter);
+      oscillator.start(start);
+      oscillator.stop(start + duration + 0.04);
+    });
   }
 
   function schedulePhrase() {
     if (!context || context.state === 'closed') return;
     const start = context.currentTime + 0.05;
-    const chord = chords[chordIndex];
+    const measure = classicalMeasures[chordIndex];
 
-    addBass(chord[0], start);
-    addBass(chord[0], start + 1.08);
-    melody.forEach((step, index) => {
-      const noteStart = start + index * 0.27;
-      addPluck(chord[step], noteStart, index === 0 || index === 4);
-      if (index === 3 || index === 7) addSparkle(chord[step], noteStart);
+    addPianoNote(measure.bass, start, 0.045, 2.75);
+    const arpeggio = [0, 1, 2, 1, 2, 1];
+    arpeggio.forEach((toneIndex, index) => {
+      const frequency = measure.chord[toneIndex % measure.chord.length];
+      addPianoNote(frequency, start + index * 0.48, index === 0 ? 0.018 : 0.014, 1.3);
+    });
+    measure.melody.forEach((frequency, index) => {
+      if (!frequency) return;
+      const phraseEnding = chordIndex === classicalMeasures.length - 1 && index === measure.melody.length - 1;
+      addPianoNote(frequency, start + index * 0.48, index === 0 ? 0.032 : 0.027, phraseEnding ? 1.8 : 1.35);
     });
 
-    chordIndex = (chordIndex + 1) % chords.length;
+    chordIndex = (chordIndex + 1) % classicalMeasures.length;
   }
 
   async function startMusic() {
@@ -125,7 +146,7 @@
     context = nextContext;
     master = nextMaster;
     master.gain.setValueAtTime(0.0001, context.currentTime);
-    master.gain.exponentialRampToValueAtTime(0.82, context.currentTime + 0.35);
+    master.gain.exponentialRampToValueAtTime(0.58, context.currentTime + 0.65);
     master.connect(context.destination);
 
     try {
@@ -135,9 +156,9 @@
         return;
       }
       schedulePhrase();
-      timer = window.setInterval(schedulePhrase, 2160);
+      timer = window.setInterval(schedulePhrase, 2880);
       button.setAttribute('aria-pressed', 'true');
-      button.setAttribute('aria-label', '발랄한 배경 음악 끄기');
+      button.setAttribute('aria-label', '잔잔한 클래식 피아노 배경 음악 끄기');
       button.querySelector('.sound-label').textContent = '음악 끄기';
     } finally {
       isStarting = false;
@@ -169,7 +190,7 @@
     }
 
     button.setAttribute('aria-pressed', 'false');
-    button.setAttribute('aria-label', '발랄한 배경 음악 켜기');
+    button.setAttribute('aria-label', '잔잔한 클래식 피아노 배경 음악 켜기');
     button.querySelector('.sound-label').textContent = '음악 켜기';
   }
 
