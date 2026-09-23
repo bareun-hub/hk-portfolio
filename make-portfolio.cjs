@@ -1,7 +1,7 @@
 const fs = require('fs');
 fs.mkdirSync('dist', {recursive:true});
 const YOUTUBE_URL='https://www.youtube.com/@%EC%9C%A8%ED%95%98%EC%83%81%EA%B6%8C%EC%97%B0%EA%B5%AC%EC%86%8Ctv';
-const WEBSITE_URL='https://bareun-hub.github.io/hk-portfolio/';
+const WEBSITE_URL='https://bareun-hub.github.io/bareun-realestate/';
 const photo=(id,w=1400)=>`https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=85`;
 const city=photo('photo-1480714378408-67cf0d13bc1b');
 const building=photo('photo-1487958449943-2429e8be8625');
